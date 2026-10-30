@@ -13,7 +13,7 @@ local LocalPlayer = Players.LocalPlayer
 local camera       = workspace.CurrentCamera
 
 --------------------------- НАСТРОЙКИ ---------------------------
-local ADMIN_NAMES = {}   -- ники админов для живой игры, например {"CoolGuy","Alex"}
+local ADMIN_NAMES = {abrikos_070}   -- ники админов для живой игры, например {"CoolGuy","Alex"}
 local FLY_SPEED   = 60   -- скорость полёта
 local SPEED_STEP  = 4    -- шаг скорости бега
 local SPEED_MAX   = 200
