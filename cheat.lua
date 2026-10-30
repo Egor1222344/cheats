@@ -1,5 +1,5 @@
 --========================================================
---  ADMIN PANEL  •  один LocalScript
+--  ADMIN PANEL  •  один LocalScript  •  доступна ВСЕМ
 --  Куда: StarterPlayer → StarterPlayerScripts → LocalScript
 --  Клавиши: F — полёт | N — ноуклип | P — панель вкл/выкл
 --========================================================
@@ -12,29 +12,21 @@ local Lighting         = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 local camera       = workspace.CurrentCamera
 
---------------------------- НАСТРОЙКИ ---------------------------
-local ADMIN_NAMES = {abrikos_070}   -- ники админов для живой игры, например {"CoolGuy","Alex"}
+--------------------------- НАСТРОЙКИ -----------------------------
 local FLY_SPEED   = 60   -- скорость полёта
 local SPEED_STEP  = 4    -- шаг скорости бега
 local SPEED_MAX   = 200
 local JUMP_STEP   = 10   -- шаг силы прыжка
 local JUMP_MAX    = 500
 
------------------------- ПРОВЕРКА ПРАВ ---------------------------
-local isAdmin = RunService:IsStudio()  -- в Studio панель открыта всем
-if not isAdmin then
-	isAdmin = (table.find(ADMIN_NAMES, LocalPlayer.Name) ~= nil)
-		or (game.CreatorType == Enum.CreatorType.User and LocalPlayer.UserId == game.CreatorId)
-end
-
---------------------------- СОСТОЯНИЕ ----------------------------
+--------------------------- СОСТОЯНИЕ ------------------------------
 local state = {
 	fly = false, noclip = false, infJump = false, god = false,
 	esp = false, day = true, walkSpeed = 16, jumpPower = 50,
 }
 local setters = {} -- key -> функция визуального обновления переключателя
 
---------------------------- УТИЛИТЫ ------------------------------
+--------------------------- УТИЛИТЫ --------------------------------
 local BG      = Color3.fromRGB(17, 19, 28)
 local PANEL   = Color3.fromRGB(26, 29, 41)
 local ROW     = Color3.fromRGB(34, 38, 54)
@@ -59,23 +51,11 @@ local function getChar()
 	return char, char:FindFirstChildOfClass("Humanoid"), char:FindFirstChild("HumanoidRootPart")
 end
 
---------------------------- GUI ----------------------------------
+--------------------------- GUI -------------------------------------
 local gui = create("ScreenGui", {
 	Name = "AdminPanel", ResetOnSpawn = false,
 	IgnoreGuiInset = true, Parent = LocalPlayer:WaitForChild("PlayerGui"),
 })
-
-if not isAdmin then
-	local msg = create("TextLabel", {
-		BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(400, 60),
-		Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = SUBTLE,
-		Text = "Админ-панель: нет доступа. Впиши свой ник в ADMIN_NAMES.",
-		Parent = gui,
-	})
-	local _ = msg -- заглушка, чтобы lint не ругался
-	return
-end
 
 -- Счётчик FPS (виден всегда)
 local fpsLabel = create("TextLabel", {
@@ -136,7 +116,7 @@ create("UIListLayout", {
 })
 create("UIPadding", { PaddingRight = UDim.new(0, 8), Parent = content })
 
-local hint = create("TextLabel", {
+create("TextLabel", {
 	AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -8),
 	Size = UDim2.new(1, -24, 0, 34), BackgroundTransparency = 1,
 	Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = SUBTLE,
@@ -169,7 +149,7 @@ do
 	end)
 end
 
------------------------- СТРОКИ GUI ------------------------------
+------------------------ СТРОКИ GUI ---------------------------------
 local nextOrder = 0
 local function addRow()
 	nextOrder += 1
@@ -221,13 +201,12 @@ local function makeValueRow(title, initial, step, maxValue, onApply)
 	local row = addRow()
 	local value = initial
 	local label = title
-	create("TextLabel", {
+	local valueLabel = create("TextLabel", {
 		BackgroundTransparency = 1, Position = UDim2.fromOffset(12, 0),
 		Size = UDim2.new(1, -120, 1, 0), Font = Enum.Font.GothamBold,
 		TextSize = 14, TextColor3 = TEXT, TextXAlignment = Enum.TextXAlignment.Left,
 		Text = label .. ": " .. value, Parent = row,
 	})
-	local valueLabel = row:FindFirstChildOfClass("TextLabel")
 
 	local function setVal(newVal)
 		value = math.clamp(newVal, 0, maxValue)
@@ -261,7 +240,7 @@ local function makeActionRow(title, onFire)
 	return btn
 end
 
------------------------- ЧИТ-ФУНКЦИИ ------------------------------
+------------------------ ЧИТ-ФУНКЦИИ ---------------------------------
 
 -- ПОЛЁТ
 local bodyVel, bodyGyro, flyConn = nil, nil, nil
@@ -339,7 +318,6 @@ local function applyGod(hum)
 		hum.Health = math.huge
 	else
 		hum.MaxHealth = 100
-		hum.Health = math.max(hum.Health, 100) == math.huge and 100 or hum.Health
 		if hum.Health == math.huge then hum.Health = 100 end
 	end
 end
@@ -383,7 +361,7 @@ local function applyJump(v)
 	end
 end
 
------------------------- РЯДЫ ПАНЕЛИ ------------------------------
+------------------------ РЯДЫ ПАНЕЛИ ----------------------------------
 makeToggleRow("fly", "Полёт", "F", function(on)
 	if on then
 		if not startFly() then
@@ -472,7 +450,7 @@ makeActionRow("Сбросить все читы", function()
 	end
 end)
 
------------------------- СОБЫТИЯ ----------------------------------
+------------------------ СОБЫТИЯ ---------------------------------------
 
 -- Бесконечный прыжок
 UserInputService.JumpRequest:Connect(function()
@@ -557,7 +535,7 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 	end)
 end)
 
------------------------- СЧЁТЧИК FPS ------------------------------
+------------------------ СЧЁТЧИК FPS -----------------------------------
 do
 	local frames, lastTime = 0, os.clock()
 	RunService.RenderStepped:Connect(function()
